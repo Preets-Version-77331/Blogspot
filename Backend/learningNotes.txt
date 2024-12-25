@@ -1,0 +1,64 @@
+1). Generally to constructor me hum  values  expect jerte hai but yhana pe ye  constructor hardcord kyu hai ? 
+
+Ans:-
+
+In the given code, the constructor in the ExchangeRateService class is not expecting values because it is designed as a singleton pattern. Here's why:
+
+Singleton Pattern
+The singleton pattern ensures that only one instance of the class is created throughout the application. By exporting a single object (new ExchangeRateService()), the same instance is shared across all modules that import it.
+
+Why Hardcoded Values in the Constructor?
+Configuration Values:
+
+The apiKey and baseURL are constants for this service. These are not meant to be changed dynamically when the class is instantiated. Instead, they are pre-configured as part of the class setup.
+apiKey is fetched from the environment variables (process.env.EXCHANGE_RATE_API_KEY) to ensure security and flexibility.
+Avoiding Dependency Injection in Constructor:
+
+If these values were passed as arguments to the constructor, every module that uses ExchangeRateService would have to pass these values explicitly.
+Hardcoding them in the constructor makes the class self-contained and easier to use without external dependencies.
+Singleton Design Choice:
+
+Since the class is instantiated only once, these values are initialized when the object is created. No external input is required because the configuration is fixed.
+Example Without Hardcoding
+If the design required flexibility, you could modify the class to accept these values in the constructor. Here's how that would look:
+
+javascript
+Copy code
+class ExchangeRateService {
+    constructor(apiKey, baseURL) {
+        this.rates = null;
+        this.apiKey = apiKey;
+        this.baseURL = baseURL;
+    }
+    async getRates() {
+        const url = `${this.baseURL}${this.apiKey}/latest/INR`;
+        console.log('fetching rates from :-', url);
+        const response = await axios.get(url);
+        if (response.status === 200 && response.data.result === 'success') {
+            this.rates = response.data.conversion_rates;
+        }
+    }
+
+    convert(amount, sourceCurrency, targetCurrency) {
+        const sourceRate = this.rates[sourceCurrency];
+        const targetRate = this.rates[targetCurrency];
+        return amount * (targetRate / sourceRate);
+    }
+}
+
+// Example usage:
+const service = new ExchangeRateService(process.env.EXCHANGE_RATE_API_KEY, 'https://v6.exchangerate-api.com/v6/');
+module.exports = service;
+However, this approach would break the simplicity of the singleton pattern and require more setup wherever the class is used.
+
+Why Current Design is Effective
+The current design:
+
+Simplifies usage by encapsulating the setup inside the class.
+Leverages the singleton pattern effectively to ensure a single instance of ExchangeRateService with pre-configured values.
+Provides clear separation of concerns: the service fetches rates and performs conversions without requiring input for setup on every use.
+
+
+
+
+
