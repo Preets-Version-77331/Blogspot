@@ -1,5 +1,3 @@
-To create a flow diagram for the provided files, I will describe the flow and interactions between the different components in text form:
-
 ### Flow Diagram Description
 
 1. **Frontend (React + Vite)**
