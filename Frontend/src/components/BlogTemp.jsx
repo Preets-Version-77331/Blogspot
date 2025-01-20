@@ -24,7 +24,7 @@ const BlogTemp = ({ blog, liked }) => {
                 .then((data) => {
                     updateBlog(data.blog)
                 })
-                setIsLiked(!isliked)
+            setIsLiked(!isliked)
         } else {
             fetch(`http://localhost:3000/api/blog/${blog._id}/like`, {
                 method: 'PATCH',
@@ -57,11 +57,12 @@ const BlogTemp = ({ blog, liked }) => {
                         </a>
                     </div>
                     <div className="group relative">
-                        <h3 onClick={() => navigate(`/blog/${blog._id}`)} className="mt-3 text-lg/6 font-semibold text-gray-900 group-hover:text-gray-600">
-                            <Link to={``}>
+                        <h3 className="mt-3 text-lg/6 font-semibold text-gray-900 group-hover:text-gray-600">
+                            <Link to={`/blog/${blog._id}`} state={{ blog }}>
                                 <span className="absolute inset-0" />
                                 {blog.title}
                             </Link>
+
                         </h3>
                         <p className="mt-5 line-clamp-3 text-sm/6 text-gray-600">{blog.content}</p>
                     </div>

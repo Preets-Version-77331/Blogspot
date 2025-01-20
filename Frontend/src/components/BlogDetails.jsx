@@ -1,68 +1,48 @@
-import { useParams } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
+import { useParams,  useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 
 const BlogDetails = () => {
-    const { _id } = useParams();
-    console.log('Id: ', _id);    
-    // Extract blog ID from the URL
-    const [blog, setBlog] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+  const { _id } = useParams();
+  const location = useLocation();
+  const blogFromState = location.state?.blog;
 
-    // Fetch blog details using the `id`
-   
-    useEffect(() => {
-        fetch(`http://localhost:3000/api/blog?id=${_id}`)
+  const [blog, setBlog] = useState(blogFromState || null);
+  const [loading, setLoading] = useState(!blogFromState); // Skip loading if data is already available.
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!blogFromState) {
+      fetch(`http://localhost:3000/api/blog/${_id}`)
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to fetch blog details');
-            }
-            return response.json();
+          if (!response.ok) throw new Error('Failed to fetch blog details');
+          return response.json();
         })
         .then(data => {
-            if (data.status === 'success') {
-                setBlog(data.blog);
-            } else {
-                throw new Error('Blog not found');
-            }
-            setLoading(false);
+          if (data.status === 'success') setBlog(data.blog);
+          else throw new Error('Blog not found');
+          setLoading(false);
         })
         .catch(err => {
-            setError(err.message);
-            setLoading(false);
+          setError(err.message);
+          setLoading(false);
         });
-}, [_id]);
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p>Error: {error}</p>;
+    }
+  }, [_id, blogFromState]);
 
-return (
-    <div style={{ padding: '20px', maxWidth: '800px', margin: 'auto' }}>
-        <h1>{blog.title}</h1>
-        <p><strong>Author:</strong> {blog.author}</p>
-        <p><strong>Created At:</strong> {new Date(blog.createdAt).toLocaleDateString()}</p>
-        <div style={{ margin: '20px 0' }}>
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
+
+  return (
+    <div className='max-w-2xl mx-auto '>
+        <div className='mb-4'>
+            <div className='flex items-center gap-2'>
+                <p>{blog.author.name}</p>
+            </div>
+            <h2>{blog.title}</h2>
             <p>{blog.content}</p>
         </div>
-        <div>
-            <p><strong>Likes:</strong> {blog.like}</p>
-        </div>
-        <div>
-            <h3>Comments</h3>
-            {blog.comments.length > 0 ? (
-                <ul style={{ listStyleType: 'none', padding: 0 }}>
-                    {blog.comments.map((comment, index) => (
-                        <li key={index} style={{ marginBottom: '15px', padding: '10px', border: '1px solid #ccc', borderRadius: '5px' }}>
-                            <p><strong>{comment.userName}</strong></p>
-                            <p>{comment.content}</p>
-                        </li>
-                    ))}
-                </ul>
-            ) : (
-                <p>No comments yet.</p>
-            )}
-        </div>
     </div>
-);
+  );
 };
 
-export default BlogDetails;
+export default BlogDetails; 
